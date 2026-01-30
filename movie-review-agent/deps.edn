@@ -1,0 +1,23 @@
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+
+        ;; Pyjama (local)
+        pyjama/pyjama {:local/root "../../pyjama"}
+
+        ;; HTTP Server
+        ring/ring-core {:mvn/version "1.10.0"}
+        ring/ring-jetty-adapter {:mvn/version "1.10.0"}
+        ring/ring-json {:mvn/version "0.5.1"}
+        ring-cors/ring-cors {:mvn/version "0.1.13"}
+
+        ;; HTTP Client
+        clj-http/clj-http {:mvn/version "3.12.3"}
+        cheshire/cheshire {:mvn/version "5.11.0"}}
+
+ :aliases
+ {:dev {:extra-paths ["dev"]
+        :extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}}
+
+  :server {:main-opts ["-m" "movie-review.server"]}
+  :pyjama {:main-opts ["-m" "pyjama.cli.agent"]}}}

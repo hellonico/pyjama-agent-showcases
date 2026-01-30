@@ -1,0 +1,37 @@
+{:movie-review-agent
+ {:description "Searches for a movie, fetches information and reviews, then uses LLM to analyze and summarize."
+  :start :search-movie
+  :max-steps 10
+
+  :tools
+  {:tmdb-movie-report {:fn movie-review.tools.tmdb/tmdb-movie-report}
+   :notify {:fn pyjama.tools.notify/notify-user :args {:channel "stdout"}}}
+
+  :steps
+  {:search-movie
+   {:tool :tmdb-movie-report
+    :args {:message "{{movie-name}}"}
+    :next :check-results}
+
+   :check-results
+   {:prompt "passthrough"
+    :routes [{:when [:= [:obs :status] :empty] :next :no-results}
+             {:else :llm-analyze}]}
+
+   :no-results
+   {:prompt "❌ Movie not found: {{movie-name}}"
+    :terminal? true}
+
+   :llm-analyze
+   {:prompt "resource:prompts/movie_review_analysis.md"
+    :routes [{:when [:nonempty :output-file] :next :display}
+             {:else :done}]}
+
+   :display
+   {:tool :notify
+    :args {:message "{{last-obs.text}}"}
+    :terminal? true}
+
+   :done
+   {:prompt "passthrough"
+    :terminal? true}}}}

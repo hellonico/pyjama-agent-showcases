@@ -1,0 +1,17 @@
+{
+    "name": "movie-review-agent",
+    "version": "1.0.0",
+    "description": "Movie Review Agent with ClojureScript UI",
+    "scripts": {
+        "dev": "shadow-cljs watch app",
+        "build": "shadow-cljs release app",
+        "server": "clj -M:server"
+    },
+    "devDependencies": {
+        "shadow-cljs": "^2.26.0"
+    },
+    "dependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

@@ -1,0 +1,20 @@
+# ClojureScript / Shadow-cljs
+node_modules/
+.shadow-cljs/
+public/js/
+.nrepl-port
+
+# Clojure
+.cpcache/
+.nrepl-history
+target/
+.lsp/
+.clj-kondo/
+
+# IDE
+.idea/
+*.iml
+.calva/
+
+# OS
+.DS_Store

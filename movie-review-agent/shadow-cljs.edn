@@ -1,0 +1,14 @@
+{:source-paths ["src"]
+ :dependencies [[reagent "1.2.0"]
+                [cljs-ajax "0.8.4"]
+                [bidi "2.1.6"]]
+ :dev-http {8020 "public"}
+ :builds
+ {:app
+  {:target :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules {:main {:init-fn movie-review.core/init!}}
+   :devtools {:after-load movie-review.core/reload!
+              :preloads []}}}
+ :nrepl {:port 9000}}
