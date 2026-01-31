@@ -1,0 +1,29 @@
+# Compiled files
+/target/
+/.cpcache/
+/.shadow-cljs/
+/public/js/
+/.nrepl-port
+
+# Dependencies
+/node_modules/
+
+# IDE
+/.idea/
+*.iml
+.lsp/
+.clj-kondo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+secrets.edn
+
+# Logs
+*.log
+
+# Generated images
+/tmp/
+*.png

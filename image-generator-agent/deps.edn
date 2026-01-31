@@ -1,0 +1,21 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.1"}
+
+        ;; Pyjama - Local dependency
+        hellonico/pyjama {:local/root "../../pyjama"}
+
+        ;; Web server
+        ring/ring-core {:mvn/version "1.13.0"}
+        ring/ring-jetty-adapter {:mvn/version "1.13.0"}
+        ring/ring-json {:mvn/version "0.5.1"}
+        ring-cors/ring-cors {:mvn/version "0.1.13"}
+
+        ;; Async
+        org.clojure/core.async {:mvn/version "1.8.741"}
+
+        ;; Logging
+        ch.qos.logback/logback-classic {:mvn/version "1.5.12"}}
+
+ :aliases
+ {:dev {:extra-paths ["dev"]}
+  :run {:main-opts ["-m" "image-generator.server"]}}}

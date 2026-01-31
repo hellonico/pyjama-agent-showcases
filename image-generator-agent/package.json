@@ -1,0 +1,16 @@
+{
+    "name": "image-generator-agent",
+    "version": "1.0.0",
+    "description": "AI Image Generator using Pyjama + Ollama",
+    "main": "index.js",
+    "scripts": {
+        "watch": "npx shadow-cljs watch app",
+        "compile": "npx shadow-cljs compile app",
+        "release": "npx shadow-cljs release app"
+    },
+    "dependencies": {
+        "shadow-cljs": "^2.28.21",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

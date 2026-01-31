@@ -1,0 +1,30 @@
+{:image-generator-agent
+ {:description "Generates images from text prompts using Ollama image generation with Alibaba Z-Image Turbo model."
+  :start :generate-image
+  :max-steps 5
+
+  :tools
+  {:generate-image-tool {:fn pyjama.tools.image/generate-image}
+   :notify {:fn pyjama.tools.notify/notify-user :args {:channel "stdout"}}}
+
+  :steps
+  {:generate-image
+   {:tool :generate-image-tool
+    :args {:prompt "{{prompt}}"
+           :width "{{width}}"
+           :height "{{height}}"
+           :output-path "/tmp/generated-{{timestamp}}.png"}
+    :next :check-result}
+
+   :check-result
+   {:prompt "passthrough"
+    :routes [{:when [:= [:obs :status] "error"] :next :generation-failed}
+             {:else :generation-success}]}
+
+   :generation-failed
+   {:prompt "❌ Image generation failed: {{last-obs.error}}"
+    :terminal? true}
+
+   :generation-success
+   {:prompt "passthrough"
+    :terminal? true}}}}
