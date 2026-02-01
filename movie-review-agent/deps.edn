@@ -2,8 +2,13 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
 
-        ;; Pyjama (local)
-        pyjama/pyjama {:local/root "../../pyjama"}
+        ;; Pyjama - v0.2.0 Release
+        pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
+                       :git/tag "v0.2.0"
+                       :git/sha "fc4ddc9"}
+
+        ;; For local development, uncomment:
+        ;; pyjama/pyjama {:local/root "../../pyjama"}
 
         ;; HTTP Server
         ring/ring-core {:mvn/version "1.10.0"}

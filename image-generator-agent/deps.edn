@@ -1,8 +1,13 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
 
-        ;; Pyjama - Local dependency
-        hellonico/pyjama {:local/root "../../pyjama"}
+        ;; Pyjama - v0.2.0 Release
+        hellonico/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
+                          :git/tag "v0.2.0"
+                          :git/sha "fc4ddc9"}
+
+        ;; For local development, uncomment:
+        ;; hellonico/pyjama {:local/root "../../pyjama"}
 
         ;; Web server
         ring/ring-core {:mvn/version "1.13.0"}
