@@ -4,6 +4,11 @@ A complete full-stack Pyjama agent showcase demonstrating AI image generation fr
 
 ![AI Image Generator Screenshot](AI%20Image%20Generator%20-%20Pyjama%20Showcase.png)
 
+**Example Generated Image:**
+
+![A summer beach à la Matisse](matisse.png)
+*Generated with prompt: "A summer beach à la Matisse" (512×512)*
+
 ## ✨ Features
 
 - **🎨 Text-to-Image Generation**: Transform natural language descriptions into images
