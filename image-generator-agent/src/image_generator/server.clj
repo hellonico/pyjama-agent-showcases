@@ -1,62 +1,88 @@
 (ns image-generator.server
-  "Ring server for image generator agent API with polling-based progress updates"
+  "Ring server for image generator agent API with real-time progress updates"
   (:require [ring.adapter.jetty :as jetty]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [ring.middleware.cors :refer [wrap-cors]]
             [pyjama.core]
+            [clojure.core.async :as async]
             [clojure.string :as str])
   (:gen-class))
 
 ;; Progress state storage (in-memory with request IDs)
 (defonce progress-store (atom {}))
 
+(defn combined-callback
+  "Callback that BOTH sends progress to channel AND returns image when done"
+  [progress-ch]
+  (fn [parsed]
+    ;; Send progress updates to channel
+    (when (or (:completed parsed) (:total parsed))
+      (async/go (async/>! progress-ch parsed)))
+
+    ;; Return image data when done (this is what stream function returns)
+    (when (:done parsed)
+      (:image parsed))))
+
 (defn run-image-generator-async
   "Run the image generator asynchronously with progress updates"
   [request-id prompt width height]
   (future
     (try
-      (println "🎨 Starting image generation for prompt:" prompt)
+      (println "🎨 Starting image generation:" prompt)
       (swap! progress-store assoc request-id {:status "initializing" :progress {:completed 0 :total 9}})
 
-      ;; Use direct Ollama call without streaming for simplicity
+      ;; Use streaming mode with combined callback
       (let [ollama-url (or (System/getenv "OLLAMA_URL") "http://localhost:11434")
-            result (try
-                     (println "� Calling Ollama API...")
-                     (pyjama.core/ollama
-                      ollama-url
-                      :generate-image
-                      {:model "x/z-image-turbo"
-                       :prompt prompt
-                       :width width
-                       :height height
-                       :stream false})  ; Non-streaming for simplicity
-                     (catch Exception e
-                       (println "❌ Ollama call failed:" (.getMessage e))
-                       (.printStackTrace e)
-                       nil))]
+            progress-ch (async/chan)
+            result-ch (async/go
+                        (pyjama.core/ollama
+                         ollama-url
+                         :generate-image
+                         {:model "x/z-image-turbo"
+                          :prompt prompt
+                          :width width
+                          :height height
+                          :stream true}
+                         (combined-callback progress-ch)))]
 
-        (println "📦 Result type:" (type result))
-        (println "📦 Result (first 100 chars):" (when (string? result) (subs result 0 (min 100 (count result)))))
+        ;; Monitor progress updates in a separate thread
+        (future
+          (loop []
+            (when-let [progress-update (async/<!! progress-ch)]
+              (when (:completed progress-update)
+                (println "📊 Progress:" (:completed progress-update) "/" (:total progress-update))
+                (swap! progress-store assoc-in [request-id :progress]
+                       {:completed (:completed progress-update)
+                        :total (:total progress-update)
+                        :status "generating"}))
+              (recur))))
 
-        (if (and result (string? result) (pos? (count result)))
-          (do
-            (println "✅ Image generation completed, image size:" (count result) "bytes")
-            (swap! progress-store assoc request-id {:status "complete"
-                                                    :image-data result
-                                                    :width width
-                                                    :height height
-                                                    :prompt prompt})
-            {:success true
-             :image-data result
-             :width width
-             :height height
-             :prompt prompt})
-          (do
-            (println "❌ Image generation failed - no valid image data")
-            (swap! progress-store assoc request-id {:status "error"
-                                                    :error "No image data returned"})
-            {:success false
-             :error "No image data returned"})))
+        ;; Wait for the result from the async channel
+        ;; pyjama.core/ollama returns the image data from our callback
+        (let [image-data (async/<!! result-ch)]
+          (async/close! progress-ch)
+
+          (println "🔍 Got result - is-string?=" (string? image-data) "length=" (when (string? image-data) (count image-data)))
+
+          (if (and image-data (string? image-data) (pos? (count image-data)))
+            (do
+              (println "✅ Image generated successfully (" (count image-data) "bytes)")
+              (swap! progress-store assoc request-id {:status "complete"
+                                                      :image-data image-data
+                                                      :width width
+                                                      :height height
+                                                      :prompt prompt})
+              {:success true
+               :image-data image-data
+               :width width
+               :height height
+               :prompt prompt})
+            (do
+              (println "❌ Image generation failed - no image data")
+              (swap! progress-store assoc request-id {:status "error"
+                                                      :error "No image data returned"})
+              {:success false
+               :error "No image data returned"}))))
       (catch Exception e
         (println "❌ Error generating image:" (.getMessage e))
         (.printStackTrace e)

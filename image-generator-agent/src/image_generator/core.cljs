@@ -112,6 +112,10 @@
 
     [:div.preset-buttons
      [:button.preset-btn
+      {:on-click #(swap! state assoc :width 128 :height 128)
+       :disabled (:loading? @state)}
+      "128×128"]
+     [:button.preset-btn
       {:on-click #(swap! state assoc :width 512 :height 512)
        :disabled (:loading? @state)}
       "512×512"]
