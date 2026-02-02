@@ -2,6 +2,11 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
 
+        ;; Pyjama - v0.2.0 Release (provided to all showcases)
+        pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
+                       :git/tag "v0.2.0"
+                       :git/sha "fc4ddc9"}
+
         ;; Backend dependencies
         ring/ring-core {:mvn/version "1.13.0"}
         ring/ring-jetty-adapter {:mvn/version "1.13.0"}

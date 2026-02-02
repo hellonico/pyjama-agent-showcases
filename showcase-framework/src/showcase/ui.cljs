@@ -18,6 +18,8 @@
   - :error - Error message if failed
   - :request-id - Current request ID for polling
   - :poll-interval - JavaScript interval ID for cleanup
+  - :history - Vector of past completions
+  - :show-history? - Whether history panel is visible
   
   Additional keys can be added by the specific showcase"
   [initial-state]
@@ -26,7 +28,9 @@
                   :result nil
                   :error nil
                   :request-id nil
-                  :poll-interval nil}
+                  :poll-interval nil
+                  :history []
+                  :show-history? false}
                  initial-state)))
 
 ;; ============================================================================
@@ -313,3 +317,55 @@
       :subtitle "Agent description"
       :input-component my-input
       :result-component my-result}]))
+
+(defn fetch-history!
+  "Fetch history from the server
+  
+  Parameters:
+  - state: Reagent atom
+  - api-url: Base URL (e.g., 'http://localhost:3000')
+  - opts: Optional map with :limit (default: 10)"
+  [state api-url & {:keys [limit] :or {limit 10}}]
+  (GET (str api-url "/api/history")
+    {:params {:limit limit}
+     :response-format :json
+     :keywords? true
+     :handler (fn [response]
+                (swap! state assoc :history (:history response)))
+     :error-handler (fn [error]
+                      (println "History fetch error:" error))}))
+
+(defn history-panel
+  "History panel component - showcase-specific rendering
+  
+  Parameters:
+  - state: Reagent atom
+  - api-url: API base URL
+  - render-item-fn: Function to render each history item (fn [item state] -> hiccup)"
+  [state api-url render-item-fn]
+  (when (:show-history? @state)
+    [:div.history-panel
+     [:div.history-header
+      [:h3 "📜 History"]
+      [:button.close-btn
+       {:on-click #(swap! state assoc :show-history? false)}
+       "×"]]
+     
+     (if (empty? (:history @state))
+       [:p.empty-state "No history yet. Generate something to get started!"]
+       [:div.history-list
+        (for [item (:history @state)]
+          ^{:key (:request-id item)}
+          [render-item-fn item state])])]))
+
+(defn history-toggle-button
+  "Button to toggle history panel"
+  [state api-url]
+  [:button.history-toggle
+   {:on-click #(do
+                 (when-not (:show-history? @state)
+                   (fetch-history! state api-url :limit 20))
+                 (swap! state update :show-history? not))}
+   (if (:show-history? @state)
+     "Hide History"
+     "Show History")])

@@ -12,6 +12,9 @@
 ;; In-memory storage for request progress and results
 (defonce progress-store (atom {}))
 
+;; History storage - keeps completed requests
+(defonce history-store (atom []))
+
 (defn update-progress!
   "Update progress for a request"
   [request-id status & {:keys [progress result error]}]
@@ -19,12 +22,30 @@
          (cond-> {:status status}
            progress (assoc :progress progress)
            result   (assoc :result result)
-           error    (assoc :error error))))
+           error    (assoc :error error)))
+
+  ;; If complete, add to history
+  (when (= status "complete")
+    (swap! history-store
+           (fn [history]
+             (let [entry {:request-id request-id
+                          :timestamp (System/currentTimeMillis)
+                          :result result}]
+               ;; Keep last 50 entries
+               (take 50 (cons entry history)))))))
 
 (defn get-progress
   "Get progress data for a request"
   [request-id]
   (get @progress-store request-id))
+
+(defn get-history
+  "Get history of completed requests
+  
+  Options:
+  - limit: Number of entries to return (default: 10)"
+  [& {:keys [limit] :or {limit 10}}]
+  (take limit @history-store))
 
 (defn clear-progress!
   "Clear progress data for a request (cleanup)"
@@ -101,6 +122,15 @@
       {:status 404
        :body {:error "Request not found"}})))
 
+(defn history-handler
+  "Generic handler for GET /api/history"
+  [request]
+  (let [limit (-> request :params :limit (or "10") Integer/parseInt)
+        history (get-history :limit limit)]
+    {:status 200
+     :body {:history history
+            :count (count history)}}))
+
 (defn health-handler
   "Generic handler for GET /api/health"
   [service-name]
@@ -132,6 +162,10 @@
         ;; Progress endpoint
         (and (= method :get) (.startsWith uri "/api/progress/"))
         (progress-handler request)
+
+        ;; History endpoint
+        (and (= method :get) (= uri "/api/history"))
+        (history-handler request)
 
         ;; Health endpoint
         (and (= method :get) (= uri "/api/health"))

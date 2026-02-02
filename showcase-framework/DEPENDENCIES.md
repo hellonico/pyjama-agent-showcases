@@ -65,9 +65,8 @@ The **showcase-framework** declares all common dependencies, and showcases only 
 ### After (image-generator-agent/deps.edn)
 ```clojure
 {:deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        hellonico/pyjama {...}
         
-        ;; Framework provides: Ring, Jetty, Reagent, AJAX, etc.
+        ;; Framework provides: Pyjama, Ring, Jetty, Reagent, AJAX, etc.
         hellonico/showcase-framework {:local/root "../showcase-framework"}
         
         ;; Only showcase-specific dependencies
@@ -78,9 +77,8 @@ The **showcase-framework** declares all common dependencies, and showcases only 
 ### After (movie-review-agent/deps.edn)
 ```clojure
 {:deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        pyjama/pyjama {...}
         
-        ;; Framework provides: Ring, Jetty, Reagent, AJAX, etc.
+        ;; Framework provides: Pyjama, Ring, Jetty, Reagent, AJAX, etc.
         hellonico/showcase-framework {:local/root "../showcase-framework"}
         
         ;; Only showcase-specific dependencies
@@ -115,9 +113,10 @@ Now showcase authors only need to think about:
 ```
 New Showcase
     │
-    ├── Declares: Clojure, Pyjama, showcase-framework, my-special-lib
+    ├── Declares: Clojure, showcase-framework, my-special-lib
     │
     └──▶ showcase-framework (transitively provides)
+            ├── Pyjama (agent framework)
             ├── Ring (server)
             ├── Jetty (HTTP)
             ├── Ring-JSON (serialization)
@@ -131,14 +130,13 @@ New Showcase
 ### Showcase with no special deps
 ```clojure
 {:deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        hellonico/pyjama {...}
         hellonico/showcase-framework {:local/root "../showcase-framework"}}}
+        ;; Gets: Pyjama, Ring, Jetty, Reagent, AJAX transitively
 ```
 
 ### Showcase with async streaming
 ```clojure
 {:deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        hellonico/pyjama {...}
         hellonico/showcase-framework {:local/root "../showcase-framework"}
         org.clojure/core.async {:mvn/version "1.8.741"}}}  ; For streaming
 ```
@@ -146,7 +144,6 @@ New Showcase
 ### Showcase with external API
 ```clojure
 {:deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        hellonico/pyjama {...}
         hellonico/showcase-framework {:local/root "../showcase-framework"}
         clj-http/clj-http {:mvn/version "3.12.3"}}}  ; For API calls
 ```

@@ -2,25 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
 
-        ;; Pyjama - v0.2.0 Release
-        pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
-                       :git/tag "v0.2.0"
-                       :git/sha "fc4ddc9"}
-
-        ;; For local development, uncomment:
-        ;; pyjama/pyjama {:local/root "../../pyjama"}
-
-        ;; Common showcase framework (provides Ring, Jetty, Reagent, AJAX, etc.)
+        ;; Common showcase framework (provides Pyjama, Ring, Jetty, Reagent, AJAX, etc.)
         hellonico/showcase-framework {:local/root "../showcase-framework"}
 
         ;; Showcase-specific dependencies
         ;; HTTP Client for TMDB API
         clj-http/clj-http {:mvn/version "3.12.3"}
-        cheshire/cheshire {:mvn/version "5.11.0"}}
-
- :aliases
- {:dev {:extra-paths ["dev"]
-        :extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}}
-
-  :server {:main-opts ["-m" "movie-review.server"]}
-  :pyjama {:main-opts ["-m" "pyjama.cli.agent"]}}}
+        cheshire/cheshire {:mvn/version "5.11.0"}}}

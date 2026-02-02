@@ -1,24 +1,10 @@
 {:paths ["src" "resources"]
+
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
 
-        ;; Pyjama - v0.2.0 Release
-        hellonico/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
-                          :git/tag "v0.2.0"
-                          :git/sha "fc4ddc9"}
-
-        ;; For local development, uncomment:
-        ;; hellonico/pyjama {:local/root "../../pyjama"}
-
-        ;; Common showcase framework (provides Ring, Jetty, Reagent, AJAX, etc.)
+        ;; Common showcase framework (provides Pyjama, Ring, Jetty, Reagent, AJAX, etc.)
         hellonico/showcase-framework {:local/root "../showcase-framework"}
 
         ;; Showcase-specific dependencies
-        ;; Async for Ollama streaming
-        org.clojure/core.async {:mvn/version "1.8.741"}
-
-        ;; Logging
-        ch.qos.logback/logback-classic {:mvn/version "1.5.12"}}
-
- :aliases
- {:dev {:extra-paths ["dev"]}
-  :run {:main-opts ["-m" "image-generator.server"]}}}
+        org.clojure/core.async {:mvn/version "1.8.741"}  ; For Ollama streaming
+        ch.qos.logback/logback-classic {:mvn/version "1.5.12"}}}

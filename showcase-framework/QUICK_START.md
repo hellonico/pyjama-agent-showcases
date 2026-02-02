@@ -13,12 +13,7 @@ Create `deps.edn`:
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
         
-        ;; Your pyjama dependency
-        hellonico/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
-                          :git/tag "v0.2.0"
-                          :git/sha "fc4ddc9"}
-        
-        ;; Common showcase framework (provides Ring, Jetty, Reagent, AJAX, etc.)
+        ;; Common showcase framework (provides Pyjama, Ring, Jetty, Reagent, AJAX, etc.)
         hellonico/showcase-framework {:local/root "../showcase-framework"}
         
         ;; Add any showcase-specific dependencies here
