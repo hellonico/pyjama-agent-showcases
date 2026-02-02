@@ -4,7 +4,7 @@ You are a professional film critic and analyst. You have been provided with movi
 
 ## Movie Information
 
-{{trace[-2].obs.text}}
+{{last-obs.text}}
 
 ---
 

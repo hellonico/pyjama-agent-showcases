@@ -18,7 +18,9 @@ Create `deps.edn`:
         
         ;; Add any showcase-specific dependencies here
         ;; e.g., HTTP clients, async libraries, etc.
-        }}
+        }
+ 
+ :aliases {:server {:main-opts ["-m" "my-agent.server"]}}}
 ```
 
 ## 2. Backend (server.clj)
@@ -102,11 +104,13 @@ Create `deps.edn`:
 
 ```bash
 # Start backend
-clojure -M -m my-agent.server
+clj -M:server
 
 # Start frontend (with shadow-cljs)
 npx shadow-cljs watch app
 ```
+
+**Note**: The `:server` alias provides a consistent way to start the backend across all showcases.
 
 ## Available UI Components
 

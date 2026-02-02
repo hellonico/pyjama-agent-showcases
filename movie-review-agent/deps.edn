@@ -8,4 +8,7 @@
         ;; Showcase-specific dependencies
         ;; HTTP Client for TMDB API
         clj-http/clj-http {:mvn/version "3.12.3"}
-        cheshire/cheshire {:mvn/version "5.11.0"}}}
+        cheshire/cheshire {:mvn/version "5.11.0"}}
+
+ :aliases {:server {:main-opts ["-m" "movie-review.server"]}
+           :cli {:main-opts ["-m" "showcase.cli"]}}}

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Movie Review Agent - CLI Mode (using Pyjama generic runner)
+# Movie Review Agent - CLI Mode
 # Usage: ./review.sh "movie name"
 
 if [ $# -eq 0 ]; then
@@ -12,8 +12,5 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Use pyjama's generic runner with agent config
-clj -J-Dagents.edn="$(pwd)/movie-review-agent.edn" \
-    -M:pyjama run movie-review-agent "{\"movie-name\":\"$1\"}"
-
-
+# Use the showcase CLI
+clj -M:cli movie "$1"

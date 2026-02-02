@@ -15,4 +15,7 @@
 
         ;; Frontend dependencies  
         reagent/reagent {:mvn/version "1.2.0"}
-        cljs-ajax/cljs-ajax {:mvn/version "0.8.4"}}}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.4"}}
+
+ :aliases {:start {:main-opts ["-m" "showcase.start"]}
+           :cli {:main-opts ["-m" "showcase.cli"]}}}

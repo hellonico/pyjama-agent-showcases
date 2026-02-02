@@ -31,7 +31,7 @@ fi
 
 # Start the backend server in the background
 echo "🚀 Starting backend server on port 3000..."
-clj -M:run &
+clj -M:server &
 BACKEND_PID=$!
 
 # Give the backend time to start

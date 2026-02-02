@@ -72,15 +72,20 @@
     (let [search-result (search-movie movie-name)]
       (if (= :empty (:status search-result))
         search-result
-        ;; Get the first (most relevant) movie
-        (let [movie (first (:results search-result))
+        ;; Get the first movie with actual data (non-zero votes)
+        (let [movie (or (first (filter #(> (:vote_count % 0) 0) (:results search-result)))
+                        (first (:results search-result)))  ; fallback to first if none have votes
               movie-id (:id movie)
               details (get-movie-details movie-id)
               reviews (get-movie-reviews movie-id)
 
               ;; Format the report
+              release-year (let [date (:release_date details)]
+                             (if (and date (>= (count date) 4))
+                               (subs date 0 4)
+                               "Unknown"))
               report (str/join "\n\n"
-                               ["# " (:title details) " (" (subs (:release_date details "") 0 4) ")"
+                               ["# " (:title details) " (" release-year ")"
                                 ""
                                 "## Overview"
                                 (:overview details)

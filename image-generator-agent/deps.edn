@@ -7,4 +7,7 @@
 
         ;; Showcase-specific dependencies
         org.clojure/core.async {:mvn/version "1.8.741"}  ; For Ollama streaming
-        ch.qos.logback/logback-classic {:mvn/version "1.5.12"}}}
+        ch.qos.logback/logback-classic {:mvn/version "1.5.12"}}
+
+ :aliases {:server {:main-opts ["-m" "image-generator.server"]}
+           :cli {:main-opts ["-m" "showcase.cli"]}}}

@@ -11,10 +11,6 @@
   {:search-movie
    {:tool :tmdb-movie-report
     :args {:message "{{movie-name}}"}
-    :next :check-results}
-
-   :check-results
-   {:prompt "passthrough"
     :routes [{:when [:= [:obs :status] :empty] :next :no-results}
              {:else :llm-analyze}]}
 
