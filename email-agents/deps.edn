@@ -2,11 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         email-client/email-client {:git/url "https://github.com/hellonico/pyjama-tools"
-                                   :git/sha "7d660ad2a39cc767a77076e5cbd71e85e5a483c4"
+                                   :git/sha "77d31c0a4449e593612ddccef6a09343506f220d"
                                    :deps/root "email-client"}
         pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
-                       :git/tag "v0.2.0"
-                       :git/sha "fc4ddc9"}
+                       :git/sha "4de7dc531a21a24bc8b95b9f823e32bad5deb61d"}
         hellonico/secrets {:git/url "https://github.com/hellonico/secrets.git"
                            :git/sha "a9bbf5ab13fc5df2ae6e20a586b14a5476eb945c"}}
 
