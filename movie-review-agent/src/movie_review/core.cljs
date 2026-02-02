@@ -26,10 +26,30 @@
 ;; Custom UI Components
 ;; ============================================================================
 
+(defn render-movie-history-item
+  "Render a single movie history item"
+  [item state]
+  (let [result (:result item)
+        timestamp (:timestamp item)
+        date (js/Date. (* timestamp 1000))
+        time-str (.toLocaleString date)]
+    [:div.history-item
+     {:on-click #(swap! state assoc :result result)}
+     [:div.history-content
+      [:div.history-icon "🎬"]
+      [:div.history-details
+       [:div.history-preview
+        (or (subs result 0 (min 100 (count result))) "Movie review")]
+       [:div.history-time time-str]]]]))
+
 (defn input-section
   "Custom input section for movie review"
   [state api-url]
   [:div
+   ;; History toggle button
+   [:div.controls-row
+    [ui/history-toggle-button state api-url]]
+
    ;; Movie name input
    [:div.search-box
     [:input.movie-input
@@ -75,13 +95,18 @@
 (defonce app-state (ui/create-state initial-state))
 
 (defn app []
-  [ui/showcase-app
-   {:title "🎬 Movie Review Agent"
-    :subtitle "Enter a movie name to get AI-powered analysis with TMDB data"
-    :input-component input-section
-    :result-component result-section
-    :state app-state
-    :api-url "http://localhost:3000"}])
+  [:div
+   ;; History panel
+   [ui/history-panel app-state "http://localhost:3000" render-movie-history-item]
+
+   ;; Main app
+   [ui/showcase-app
+    {:title "🎬 Movie Review Agent"
+     :subtitle "Enter a movie name to get AI-powered analysis with TMDB data"
+     :input-component input-section
+     :result-component result-section
+     :state app-state
+     :api-url "http://localhost:3000"}]])
 
 ;; Init & Reload
 (defn init! []

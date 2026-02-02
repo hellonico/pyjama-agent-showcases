@@ -8,10 +8,35 @@
 ;; Custom UI Components
 ;; ============================================================================
 
+(defn render-image-history-item
+  "Render a single image history item with thumbnail"
+  [item state]
+  (let [result (:result item)
+        image-data (:image-data result)
+        prompt (:prompt result)
+        timestamp (:timestamp item)
+        date (js/Date. (* timestamp 1000))
+        time-str (.toLocaleString date)]
+    [:div.history-item
+     {:on-click #(swap! state assoc :result result)}
+     [:div.history-content
+      [:img.history-thumbnail
+       {:src (str "data:image/png;base64," image-data)
+        :alt "Generated image"}]
+      [:div.history-details
+       [:div.history-prompt
+        (or (subs prompt 0 (min 60 (count prompt))) prompt)
+        (when (> (count prompt) 60) "...")]
+       [:div.history-time time-str]]]]))
+
 (defn input-section
   "Custom input section for image generation"
   [state api-url]
   [:div
+   ;; History toggle button
+   [:div.controls-row
+    [ui/history-toggle-button state api-url]]
+
    ;; Prompt input
    [:div.prompt-box
     [ui/text-input state :prompt
@@ -89,13 +114,18 @@
 (defonce app-state (ui/create-state initial-state))
 
 (defn app []
-  [ui/showcase-app
-   {:title "🎨 AI Image Generator"
-    :subtitle "Generate images from text using Ollama + Alibaba Z-Image Turbo"
-    :input-component input-section
-    :result-component result-section
-    :state app-state
-    :api-url "http://localhost:3000"}])
+  [:div
+   ;; History panel
+   [ui/history-panel app-state "http://localhost:3000" render-image-history-item]
+
+   ;; Main app
+   [ui/showcase-app
+    {:title "🎨 AI Image Generator"
+     :subtitle "Generate images from text using Ollama + Alibaba Z-Image Turbo"
+     :input-component input-section
+     :result-component result-section
+     :state app-state
+     :api-url "http://localhost:3000"}]])
 
 ;; Init & Reload
 (defn init! []
