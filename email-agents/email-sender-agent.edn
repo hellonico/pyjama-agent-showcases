@@ -1,0 +1,42 @@
+{:email-sender-agent
+ {:description "Email sender agent that uses LLM to generate and send emails based on a prompt"
+  :start :generate-email
+  :max-steps 10
+
+  :tools
+  {:send-email {:fn email-client.tools.registry/send-email}}
+
+  :steps
+  {:generate-email
+   {:prompt "You are an email writing assistant. The user wants to send an email.
+
+TO: {{to}}
+REQUEST: {{request}}
+
+Write a professional email. Respond ONLY with two lines:
+SUBJECT: [write the subject line here]
+BODY: [write the email body here]
+
+Do not include any other text or formatting."
+    :routes [{:else :send-email}]}
+
+   :send-email
+   {:tool :send-email
+    :args {:to "{{to}}"
+           :subject "{{request}}"
+           :body "{{last-obs.text}}"}
+    :routes [{:when [:get [:obs :success]] :next :done}
+             {:else :error-sending}]}
+
+   :done
+   {:prompt "✓ Email sent successfully!
+
+To: {{to}}
+Request: {{request}}
+
+The email has been sent."
+    :terminal? true}
+
+   :error-sending
+   {:prompt "❌ Error sending email: {{last-obs.error}}"
+    :terminal? true}}}}

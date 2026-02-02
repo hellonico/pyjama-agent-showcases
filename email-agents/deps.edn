@@ -1,0 +1,24 @@
+{:paths []  ; No source files needed - pure EDN agents!
+
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        email-client/email-client {:git/url "https://github.com/hellonico/pyjama-tools"
+                                   :git/sha "ba055c14fae2fedd0874fc58b407312bf98247a4"
+                                   :deps/root "email-client"}
+        pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
+                       :git/tag "v0.2.0"
+                       :git/sha "fc4ddc9"}
+        hellonico/secrets {:git/url "https://github.com/hellonico/secrets.git"
+                           :git/sha "a9bbf5ab13fc5df2ae6e20a586b14a5476eb945c"}}
+
+ :aliases
+ {:watcher
+  {:main-opts ["-m" "pyjama.cli.agent" "run" "email-watcher-agent" "{}"]
+   :jvm-opts ["-Dagents.edn=email-watcher-agent.edn"]}
+
+  :sender
+  {:main-opts ["-m" "pyjama.cli.agent" "run" "email-sender-agent"
+               "{\"to\":\"mohnicolas02@gmail.com\",\"request\":\"write a test email\"}"]
+   :jvm-opts ["-Dagents.edn=email-sender-agent.edn"]}}
+
+ ;; No need for CLI tools - this is pure EDN!
+ }

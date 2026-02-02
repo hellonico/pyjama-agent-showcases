@@ -1,0 +1,44 @@
+{:email-watcher-agent
+ {:description "Email watcher that monitors inbox and summarizes new emails with LLM, saving to file"
+  :start :watch-loop
+  :max-steps 100  ; Allow many iterations for continuous watching
+
+  :tools
+  {:watch-emails {:fn email-client.tools.registry/watch-emails}
+   :write-file {:fn pyjama.tools.io/write-file}}
+
+  :steps
+  {:watch-loop
+   {:tool :watch-emails
+    :args {:interval-ms 5000}
+    :routes [{:when [:nonempty [:obs :subject]] :next :summarize-email}
+             {:else :watch-loop}]}  ; Keep looping
+
+   :summarize-email
+   {:prompt "New email received:
+
+From: {{last-obs.from}}
+Subject: {{last-obs.subject}}
+Date: {{last-obs.date}}
+
+Email content:
+{{last-obs.body}}
+
+Please provide a brief 2-3 sentence summary of this email highlighting the key points and any action items."
+    :routes [{:else :save-summary}]}
+
+   :save-summary
+   {:tool :write-file
+    :args {:path "email-summaries.md"
+           :content "## Email from {{last-obs.from}}
+**Subject:** {{last-obs.subject}}  
+**Date:** {{last-obs.date}}
+
+**Summary:**
+{{last-obs.text}}
+
+---
+
+"
+           :append true}
+    :routes [{:else :watch-loop}]}}}}  ; After saving, go back to watching
