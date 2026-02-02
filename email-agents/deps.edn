@@ -2,7 +2,7 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         email-client/email-client {:git/url "https://github.com/hellonico/pyjama-tools"
-                                   :git/sha "ba055c14fae2fedd0874fc58b407312bf98247a4"
+                                   :git/sha "e905633495d759dfcf93e5a04749fe819e5877aa"
                                    :deps/root "email-client"}
         pyjama/pyjama {:git/url "https://github.com/hellonico/pyjama.git"
                        :git/tag "v0.2.0"
