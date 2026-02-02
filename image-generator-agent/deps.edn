@@ -9,13 +9,11 @@
         ;; For local development, uncomment:
         ;; hellonico/pyjama {:local/root "../../pyjama"}
 
-        ;; Web server
-        ring/ring-core {:mvn/version "1.13.0"}
-        ring/ring-jetty-adapter {:mvn/version "1.13.0"}
-        ring/ring-json {:mvn/version "0.5.1"}
-        ring-cors/ring-cors {:mvn/version "0.1.13"}
+        ;; Common showcase framework (provides Ring, Jetty, Reagent, AJAX, etc.)
+        hellonico/showcase-framework {:local/root "../showcase-framework"}
 
-        ;; Async
+        ;; Showcase-specific dependencies
+        ;; Async for Ollama streaming
         org.clojure/core.async {:mvn/version "1.8.741"}
 
         ;; Logging

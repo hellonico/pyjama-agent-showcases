@@ -10,13 +10,11 @@
         ;; For local development, uncomment:
         ;; pyjama/pyjama {:local/root "../../pyjama"}
 
-        ;; HTTP Server
-        ring/ring-core {:mvn/version "1.10.0"}
-        ring/ring-jetty-adapter {:mvn/version "1.10.0"}
-        ring/ring-json {:mvn/version "0.5.1"}
-        ring-cors/ring-cors {:mvn/version "0.1.13"}
+        ;; Common showcase framework (provides Ring, Jetty, Reagent, AJAX, etc.)
+        hellonico/showcase-framework {:local/root "../showcase-framework"}
 
-        ;; HTTP Client
+        ;; Showcase-specific dependencies
+        ;; HTTP Client for TMDB API
         clj-http/clj-http {:mvn/version "3.12.3"}
         cheshire/cheshire {:mvn/version "5.11.0"}}
 

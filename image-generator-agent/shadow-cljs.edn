@@ -1,6 +1,6 @@
-{:source-paths ["src"]
- :dependencies [[reagent "1.2.0"]
-                [cljs-ajax "0.8.4"]]
+{:source-paths ["src" "../showcase-framework/src"]
+ :dependencies [[reagent "1.2.0"]      ; ClojureScript deps needed for compilation
+                [cljs-ajax "0.8.4"]]   ; (Backend deps come from deps.edn)
  :builds {:app {:target :browser
                 :output-dir "public/js"
                 :asset-path "/js"

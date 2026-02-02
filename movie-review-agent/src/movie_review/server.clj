@@ -1,18 +1,25 @@
 (ns movie-review.server
-  "Ring server for movie review agent API"
-  (:require [ring.adapter.jetty :as jetty]
-            [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-            [ring.middleware.cors :refer [wrap-cors]]
+  "Ring server for movie review agent API - refactored to use showcase framework"
+  (:require [showcase.server :as showcase]
             [pyjama.agent.core :as agent]
             [pyjama.core]
             [clojure.java.io :as io])
   (:gen-class))
 
-(defn run-movie-agent-async
-  "Run the movie review agent asynchronously"
-  [movie-name]
-  (future
-    (try
+;; ============================================================================
+;; Movie Review Agent Execution
+;; ============================================================================
+
+(defn execute-movie-review-agent
+  "Execute the movie review agent with parameters
+  
+  Takes opts map with:
+    :params - {:movie-name string}
+    :progress-fn - (fn [completed total] -> nil) [not currently used]
+  Returns {:success bool :result any :error string}"
+  [{:keys [params _progress-fn]}]
+  (try
+    (let [{:keys [movie-name]} params]
       (println "🎬 Starting movie analysis for:" movie-name)
 
       ;; Set the agent config file path as a system property so pyjama can find it
@@ -32,70 +39,26 @@
         {:success true
          :result (or (:text result)      ; LLM returns :text
                      (:message result)   ; fallback
-                     (pr-str result))})
-      (catch Exception e
-        (println "❌ Error executing agent:" (.getMessage e))
-        (.printStackTrace e)
-        {:success false
-         :error (.getMessage e)
-         :details (ex-data e)}))))
+                     (pr-str result))}))
+    (catch Exception e
+      (println "❌ Error executing agent:" (.getMessage e))
+      (.printStackTrace e)
+      {:success false
+       :error (.getMessage e)})))
 
-(defn analyze-movie-handler
-  "Handle POST /api/analyze-movie requests"
-  [request]
-  (let [movie-name (get-in request [:body :movie-name])]
-    (if (or (nil? movie-name) (empty? movie-name))
-      {:status 400
-       :body {:success false
-              :error "movie-name is required"}}
-      (let [result-future (run-movie-agent-async movie-name)
-            result @result-future]  ; Blocking wait for agent completion
-        {:status 200
-         :body result}))))
-
-(defn health-handler [_request]
-  {:status 200
-   :body {:status "ok"
-          :service "movie-review-agent"}})
-
-(defn routes
-  "Main routing handler"
-  [request]
-  (let [uri (:uri request)
-        method (:request-method request)]
-    (cond
-      (and (= method :post) (= uri "/api/analyze-movie"))
-      (analyze-movie-handler request)
-
-      (and (= method :get) (= uri "/api/health"))
-      (health-handler request)
-
-      :else
-      {:status 404
-       :body {:error "Not found"}})))
-
-(def app
-  (-> routes
-      (wrap-json-body {:keywords? true})
-      wrap-json-response
-      (wrap-cors :access-control-allow-origin [#"http://localhost:8020"]
-                 :access-control-allow-methods [:get :post :options]
-                 :access-control-allow-headers ["Content-Type"])))
-
-(defn start-server
-  "Start the API server"
-  [& {:keys [port] :or {port 3000}}]
-  (println (format "🚀 Movie Review API server starting on port %d..." port))
-  (println "📡 Accepting requests at http://localhost:3000/api/analyze-movie")
-  (println "🌐 ClojureScript frontend should run on http://localhost:8020")
-  (jetty/run-jetty app {:port port :join? false}))
+;; ============================================================================
+;; Server
+;; ============================================================================
 
 (defn -main [& _args]
-  (start-server))
+  (showcase/start-server
+   :execute-fn execute-movie-review-agent
+   :service-name "movie-review-agent"
+   :port 3000))
 
 (comment
   ;; Start server from REPL
-  (def server (start-server :port 3000))
+  (def server (-main))
 
   ;; Stop server
   (.stop server))
