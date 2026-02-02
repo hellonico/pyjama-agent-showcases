@@ -6,11 +6,13 @@ Two Pyjama agents for email automation - **no Clojure code required!** Everythin
 
 ### 1. Email Watcher Agent (`email-watcher-agent.edn`)
 
-Monitors your inbox and summarizes new emails using the LLM.
+Monitors your inbox and summarizes new emails using the LLM with **batch processing via declarative loops**.
 
 **Features:**
 - Continuously polls for unread emails
+- **NEW: Processes multiple emails in batch using loop construct**
 - LLM summarizes each email highlighting key points and action items  
+- Saves summaries to markdown file
 - Runs in an endless loop
 
 **Usage:**
@@ -23,12 +25,20 @@ clojure -M:watcher
 ```
 🤖 PYJAMA AGENTS 🤖
 
-📧 New email received:
-From: john@example.com
-Subject: Meeting Tomorrow
+✓ Retrieved 3 unread email(s)
+✓ Marked 3 email(s) as read
 
-📝 Summary: John is requesting a meeting tomorrow at 2pm to discuss 
-the quarterly review. Action: Confirm availability and send calendar invite.
+Processing email 0 of 3...
+📧 From: john@example.com
+📝 Summary: John is requesting a meeting tomorrow at 2pm...
+
+Processing email 1 of 3...
+📧 From: sarah@example.com
+📝 Summary: Sarah sent the quarterly report...
+
+Processing email 2 of 3...
+📧 From: team@company.com
+📝 Summary: Team announcement about new project...
 ```
 
 ### 2. Email Sender Agent (`email-sender-agent.edn`)
@@ -131,6 +141,37 @@ Pyjama automatically:
 7. Loops as needed
 
 **Zero Clojure code required!**
+
+### Declarative Loops (NEW!)
+
+The email watcher uses Pyjama's new **declarative loop construct** for batch processing:
+
+```edn
+:process-all-emails
+{:loop-over [:obs :emails]      ; Iterate over the emails collection
+ :loop-body :summarize-email    ; Process each email
+ :next :watch-loop}             ; After all emails, go back to watching
+
+:summarize-email
+{:prompt "Email {{loop-index}} of {{loop-count}}:
+From: {{loop-item.from}}
+Subject: {{loop-item.subject}}
+..."
+ :next :save-summary}
+```
+
+**Loop Context Variables:**
+- `{{loop-item}}` - Current email being processed
+- `{{loop-index}}` - Zero-based index (0, 1, 2, ...)
+- `{{loop-count}}` - Total number of emails
+- `{{loop-remaining}}` - Emails remaining
+
+**Benefits:**
+- ✅ Process multiple emails in one batch
+- ✅ No manual routing or pop tools needed
+- ✅ Clearer intent and simpler EDN
+- ✅ Automatic iteration management
+
 
 ## Use Cases
 

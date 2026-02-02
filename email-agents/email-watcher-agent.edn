@@ -1,5 +1,5 @@
 {:email-watcher-agent
- {:description "Email watcher that monitors inbox and summarizes new emails with LLM, saving to file"
+ {:description "Email watcher that monitors inbox and summarizes new emails with LLM using declarative loop for batch processing"
   :start :watch-loop
   :max-steps 100  ; Allow many iterations for continuous watching
 
@@ -10,29 +10,36 @@
   :steps
   {:watch-loop
    {:tool :watch-emails
-    :args {:interval-ms 5000}
-    :routes [{:when [:nonempty [:obs :subject]] :next :summarize-email}
+    :args {:interval-ms 5000
+           :limit 10}  ; Get up to 10 emails at once
+    :routes [{:when [:nonempty [:obs :emails]] :next :process-all-emails}
              {:else :watch-loop}]}  ; Keep looping
 
-   :summarize-email
-   {:prompt "New email received:
+   ;; NEW: Process all emails using declarative loop
+   :process-all-emails
+   {:loop-over [:obs :emails]
+    :loop-body :summarize-email
+    :next :watch-loop}  ; After processing all emails, go back to watching
 
-From: {{last-obs.from}}
-Subject: {{last-obs.subject}}
-Date: {{last-obs.date}}
+   :summarize-email
+   {:prompt "New email received ({{loop-index}} of {{loop-count}}):
+
+From: {{loop-item.from}}
+Subject: {{loop-item.subject}}
+Date: {{loop-item.date}}
 
 Email content:
-{{last-obs.body}}
+{{loop-item.body}}
 
 Please provide a brief 2-3 sentence summary of this email highlighting the key points and any action items."
-    :routes [{:else :save-summary}]}
+    :next :save-summary}
 
    :save-summary
    {:tool :write-file
     :args {:path "email-summaries.md"
-           :content "## Email from {{last-obs.from}}
-**Subject:** {{last-obs.subject}}  
-**Date:** {{last-obs.date}}
+           :content "## Email {{loop-index}} from {{loop-item.from}}
+**Subject:** {{loop-item.subject}}  
+**Date:** {{loop-item.date}}
 
 **Summary:**
 {{last-obs.text}}
@@ -41,4 +48,4 @@ Please provide a brief 2-3 sentence summary of this email highlighting the key p
 
 "
            :append true}
-    :routes [{:else :watch-loop}]}}}}  ; After saving, go back to watching
+    :next :done}}}}  ; Return to loop
