@@ -101,16 +101,18 @@ clj -J-Dagents.edn="$(pwd)/movie-review-agent.edn" \
 
 ## 🏗️ How It Works
 
-```
-User Input
-    ↓
-Search TMDB API for movie
-    ↓
-Fetch movie details + reviews
-    ↓
-LLM analyzes content
-    ↓
-Beautiful formatted review
+```mermaid
+graph TD
+    A[👤 User Input<br/>Movie Name] --> B[🔍 Search TMDB API]
+    B --> C[📊 Fetch Movie Details<br/>+ Reviews]
+    C --> D[🤖 LLM Analysis]
+    D --> E[✨ Beautiful Formatted<br/>Review]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff9e1
+    style C fill:#ffe1f5
+    style D fill:#e1ffe1
+    style E fill:#f5e1ff
 ```
 
 ### Agent Flow
