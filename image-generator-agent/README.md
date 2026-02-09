@@ -2,8 +2,6 @@
 
 A complete full-stack Pyjama agent showcase demonstrating AI image generation from text prompts using Ollama's experimental image generation with Alibaba's Z-Image Turbo model. Features real-time progress tracking, a beautiful modern UI, and seamless integration with the Pyjama agent framework.
 
-![AI Image Generator Screenshot](AI%20Image%20Generator%20-%20Pyjama%20Showcase.png)
-
 **Example Generated Image:**
 
 ![A summer beach à la Matisse](matisse.png)
@@ -95,76 +93,62 @@ http://localhost:8020
 
 ### Full-Stack Architecture
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    Browser (localhost:8020)                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │    ClojureScript/Reagent Frontend (core.cljs)          │  │
-│  │    • Prompt input & dimension controls                 │  │
-│  │    • HTTP polling for progress updates                 │  │
-│  │    • Base64 image preview                              │  │
-│  │    • Download functionality                            │  │
-│  └────────────────────────────────────────────────────────┘  │
-└──────────────────┬───────────────────────────────────────────┘
-                   │ HTTP POST/GET
-                   │ (AJAX with cljs-ajax)
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│              Backend Server (localhost:3000)                  │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  Ring/Jetty Server (server.clj)                        │  │
-│  │  • POST /api/generate-image → Start generation         │  │
-│  │  • GET /api/progress/:id → Check progress              │  │
-│  │  • Async generation with progress tracking             │  │
-│  │  • Combined callback for progress + result             │  │
-│  └────────────────────────────────────────────────────────┘  │
-└──────────────────┬───────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│                Pyjama Framework Integration                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  pyjama.core/ollama                                    │  │
-│  │  • Streaming mode with progress callback              │  │
-│  │  • Custom callback sends progress to async channel    │  │
-│  │  • Returns base64-encoded image when done             │  │
-│  └────────────────────────────────────────────────────────┘  │
-└──────────────────┬───────────────────────────────────────────┘
-                   │ HTTP API
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│           Ollama (localhost:11434)                            │
-│           Model: x/z-image-turbo                              │
-│           • Receives prompt + dimensions                      │
-│           • Generates image in 9 steps                        │
-│           • Returns base64-encoded PNG                        │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#E3F2FD','primaryTextColor':'#000000','primaryBorderColor':'#90CAF9','secondaryColor':'#FCE4EC','secondaryTextColor':'#000000','secondaryBorderColor':'#F48FB1','tertiaryColor':'#F3E5F5','tertiaryTextColor':'#000000','tertiaryBorderColor':'#CE93D8','lineColor':'#666','textColor':'#000000','fontSize':'14px'}}}%%
+flowchart LR
+    Frontend["<b>Frontend</b><br/>ClojureScript/Reagent<br/>• Prompt input<br/>• Progress polling<br/>• Image preview"]
+    Backend["<b>Backend</b><br/>Ring/Jetty Server<br/>• /api/generate-image<br/>• /api/progress/:id<br/>• Async generation"]
+    Pyjama["<b>Pyjama</b><br/>pyjama.core/ollama<br/>• Streaming mode<br/>• Progress callback<br/>• Returns base64"]
+    Ollama["<b>Ollama</b><br/>z-image-turbo<br/>• Receives prompt<br/>• Generates image<br/>• Returns PNG"]
+    
+    Frontend -->|"HTTP POST/GET"| Backend
+    Backend --> Pyjama
+    Pyjama -->|"HTTP API"| Ollama
+    
+    classDef frontendStyle fill:#E3F2FD,stroke:#90CAF9,stroke-width:2px,color:#000000
+    classDef backendStyle fill:#FCE4EC,stroke:#F48FB1,stroke-width:2px,color:#000000
+    classDef pyjamaStyle fill:#F3E5F5,stroke:#CE93D8,stroke-width:2px,color:#000000
+    classDef ollamaStyle fill:#FFF9C4,stroke:#FFF59D,stroke-width:2px,color:#000000
+    
+    class Frontend frontendStyle
+    class Backend backendStyle
+    class Pyjama pyjamaStyle
+    class Ollama ollamaStyle
 ```
 
 ### Request Flow
 
-```
-1. User enters prompt + dimensions
-   ↓
-2. Frontend POST to /api/generate-image
-   ↓
-3. Backend starts async generation, returns request-id
-   ↓
-4. Frontend starts polling GET /api/progress/:request-id every 500ms
-   ↓
-5. Backend calls pyjama.core/ollama with streaming + custom callback
-   ↓
-6. Callback sends progress updates to async channel
-   ↓
-7. Backend stores progress in atom (progress-store)
-   ↓
-8. Frontend polls and updates progress bar
-   ↓
-9. When done, callback returns base64 image data
-   ↓
-10. Frontend receives complete status with image-data
-    ↓
-11. Image displayed in browser + download available
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#E3F2FD','actorBorder':'#90CAF9','actorTextColor':'#000000','actorLineColor':'#666','signalColor':'#000000','signalTextColor':'#000000','labelBoxBkgColor':'#F3E5F5','labelBoxBorderColor':'#CE93D8','labelTextColor':'#000000','loopTextColor':'#000000','noteBorderColor':'#FFF59D','noteBkgColor':'#FFF9C4','noteTextColor':'#000000','activationBorderColor':'#F48FB1','activationBkgColor':'#FCE4EC','sequenceNumberColor':'#000000'}}}%%
+sequenceDiagram
+    actor User
+    participant Frontend as Frontend<br/>(Browser)
+    participant Backend as Backend<br/>(Ring/Jetty)
+    participant Pyjama as Pyjama<br/>(core/ollama)
+    participant Ollama as Ollama<br/>(z-image-turbo)
+    
+    User->>Frontend: 1. Enter prompt + dimensions
+    Frontend->>Backend: 2. POST /api/generate-image
+    Backend->>Backend: 3. Start async generation
+    Backend-->>Frontend: Return request-id
+    Frontend->>Frontend: 4. Start polling (500ms interval)
+    Backend->>Pyjama: 5. Call ollama with streaming + callback
+    
+    loop Progress Updates
+        Pyjama->>Ollama: Generate image
+        Ollama-->>Pyjama: Progress update
+        Pyjama->>Backend: 6. Send progress to async channel
+        Backend->>Backend: 7. Store progress in atom
+        Frontend->>Backend: 8. GET /api/progress/:id
+        Backend-->>Frontend: Progress data
+        Frontend->>Frontend: Update progress bar
+    end
+    
+    Ollama-->>Pyjama: 9. Return base64 image
+    Pyjama-->>Backend: Image data
+    Frontend->>Backend: 10. GET /api/progress/:id
+    Backend-->>Frontend: Complete status + image-data
+    Frontend->>Frontend: 11. Display image + enable download
 ```
 
 ### Key Technical Implementation
